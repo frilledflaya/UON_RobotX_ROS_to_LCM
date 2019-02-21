@@ -118,6 +118,7 @@ catkin_package(
 include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
+  ../lcm_msg_types/lcm_types/
 )
 
 ## Declare a C++ library
