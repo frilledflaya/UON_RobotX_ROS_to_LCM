@@ -119,6 +119,7 @@ include_directories(
 # include
   ${catkin_INCLUDE_DIRS}
   ../lcm_msg_types/lcm_types/
+  ../eigen/
 )
 
 ## Declare a C++ library

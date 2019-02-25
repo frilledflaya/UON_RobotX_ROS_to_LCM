@@ -23,7 +23,7 @@ https://bitbucket.org/osrf/vmrc/wiki/tutorials/SystemSetupInstall
   - Training data is of virtual images, kinda wierd, might help somewhat for real world comp
 
 - Current Sensor
-  - I don't think this exists in Sim, additionally we were suing it for thrust estimation, I think we won't need that in Sim
+  - I don't think this exists in Sim, additionally we were using it for thrust estimation, I think we won't need that in Sim
 
 - IMU
   - Real World: Published over LCM
@@ -44,8 +44,12 @@ https://bitbucket.org/osrf/vmrc/wiki/tutorials/SystemSetupInstall
 - Localisation
   - Real World: Published over LCM
   - Simulator
-    -
-    -
+    - ROS Topic: gps/filtered
+    - Message Type: sensor_msgs/NavSatFix
+    - ROS Topic: odometry/filtered
+    - Message Type: nav_msgs/Odometry
+    - ROS Topic: odometry/gps
+    - Message Type: nav_msgs/Odometry
   - Plugin: http://wiki.ros.org/robot_localization
 
 
