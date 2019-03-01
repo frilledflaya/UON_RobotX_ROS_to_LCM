@@ -15,6 +15,7 @@
 #include <math.h>
 Eigen::Vector3f qtorpy(Eigen::Quaternionf q);
 
+// Quaternion to roll, pitch, yaw
 Eigen::Vector3f qtorpy(Eigen::Quaternionf q){
   Eigen::Matrix3f qrot;
   float sy, roll, pitch, yaw;
@@ -22,7 +23,7 @@ Eigen::Vector3f qtorpy(Eigen::Quaternionf q){
   
   qrot = q.normalized().toRotationMatrix();
   sy = sqrt(qrot(0,0)*qrot(0,0) + qrot(1,0)*qrot(1,0));
-  if (sy >= 0.000001){ // sy < 1e-6 is singular
+  if (sy >= 0.000001){ 		// sy < 1e-6 is singular
 	rpy[0] = atan2(qrot(2,1) ,qrot(2,2));
 	rpy[1] = atan2(-qrot(2,0),sy);
 	rpy[2] = atan2(qrot(1,0) ,qrot(0,0));
@@ -96,6 +97,11 @@ App::~App() {
 };
 
 // %Tag(CALLBACK)%
+// Callback for ROS raw gps data, merges gps/fix with gps/fix_velocity
+// ROS Topic	: gps/fix
+// ROS Type		: sensor_msgs/NavSatFix
+// LCM Channel	: SD_RAW_GNSS
+// LCM Type 	: SD.raw_gnss_t
 void App::gps_fix_cb(const sensor_msgs::NavSatFix::ConstPtr &msg){
   lcm_raw_gnss_msg_.latitude = msg->latitude;
   lcm_raw_gnss_msg_.longitude = msg->longitude;
@@ -109,7 +115,7 @@ void App::gps_fix_cb(const sensor_msgs::NavSatFix::ConstPtr &msg){
   lcm_raw_gnss_msg_.heading = -1;
 
   lcm_raw_gnss_msg_.tilt_standard_deviation = -1;
-  lcm_raw_gnss_msg_.heading_standard_devation = -1; //TODO: typo in definition
+  lcm_raw_gnss_msg_.heading_standard_devation = -1; //TODO: typo in definition 'devation'
 
   lcm_raw_gnss_msg_.status.doppler_velocity_valid = 1;
   lcm_raw_gnss_msg_.status.time_valid = 1;
@@ -132,6 +138,11 @@ void App::gps_fix_cb(const sensor_msgs::NavSatFix::ConstPtr &msg){
   }
 }
 
+// Callback for ROS raw gps data, merges gps/fix with gps/fix_velocity
+// ROS Topic	: gps/fix_velocity
+// ROS Type		: geometry_msgs/Vector3Stamped
+// LCM Channel	: SD_RAW_GNSS
+// LCM Type 	: SD.raw_gnss_t
 void App::gps_fix_velocity_cb(const geometry_msgs::Vector3Stamped::ConstPtr &msg){
   // ROS: NWU, to NED
   lcm_raw_gnss_msg_.north_velocity = msg->vector.x;		// North
@@ -145,6 +156,11 @@ void App::gps_fix_velocity_cb(const geometry_msgs::Vector3Stamped::ConstPtr &msg
   }
 }
 
+// Callback for ROS imu data, merges with filtered gps data, 15Hz
+// ROS Topic	: imu/data
+// ROS Type		: sensor_msgs/Imu
+// LCM Channel	: SD_STATE
+// LCM Type 	: SD.state_t.raw_sensors_t
 void App::imu_cb(const sensor_msgs::Imu::ConstPtr &msg){
   SD::raw_sensors_t lcm_msg;
   Eigen::Quaternionf q(msg->orientation.w,
@@ -183,7 +199,11 @@ void App::imu_cb(const sensor_msgs::Imu::ConstPtr &msg){
   }
 }
 
-
+// Callback for ROS filtered gps data, merges with imu data, 30Hz
+// ROS Topic	: gps/filtered
+// ROS Type		: sensor_msgs/NavSatFix
+// LCM Channel	: SD_STATE
+// LCM Type 	: SD.state_t.system_state
 void App::gps_filtered_cb(const sensor_msgs::NavSatFix::ConstPtr &msg){
 
   lcm_state_msg_.system_state.latitude = msg->latitude;
@@ -203,6 +223,11 @@ void App::gps_filtered_cb(const sensor_msgs::NavSatFix::ConstPtr &msg){
   }
 }
 
+// Callback for ROS estimated state data, merges with filtered gps data, and imu data 15Hz
+// ROS Topic	: gps/filtered
+// ROS Type		: sensor_msgs/NavSatFix
+// LCM Channel	: SD_STATE
+// LCM Type 	: SD.state_t.system_state
 void App::odom_gps_cb(const nav_msgs::Odometry::ConstPtr &msg){
   Eigen::Quaternionf q(msg->pose.pose.orientation.w,
 		       msg->pose.pose.orientation.x,
@@ -233,7 +258,6 @@ void App::odom_gps_cb(const nav_msgs::Odometry::ConstPtr &msg){
 	odom_flag = 0;
   }
 }
-
 // %EndTag(CALLBACK)%
 
 int main(int argc, char **argv)
